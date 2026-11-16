@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a0e13">
+  <title>LaunchScope — Token launch radar</title>
+  <link rel="stylesheet" href="app.css">
+  <script src="../data.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="masthead">
+      <div class="brand-lockup">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <div>
+          <p class="eyebrow">TOKEN LAUNCH RADAR</p>
+          <h1>Launch<span>Scope</span></h1>
+        </div>
+      </div>
+      <div class="model-badge"><span class="status-dot"></span> MODEL <strong>peer-anchor-1</strong></div>
+      <p class="tagline">A clear-eyed view of protocols building before a token.</p>
+      <p class="explainer">
+        Each protocol's implied value is its TVL times the median market-cap-to-TVL multiple of
+        already-tokenized protocols in the same category, shrunk toward the global median for small
+        categories. We adjust that anchor with a bounded momentum factor from 7-day TVL change, a
+        saturating seasoning factor from how long DefiLlama has tracked it, a mild log discount for
+        very large TVL, and a small multi-chain breadth bonus.
+        <span class="data-date">Model peer-anchor-1 <span aria-hidden="true">/</span> Data date: awaiting snapshot</span>
+      </p>
+    </header>
+
+    <main>
+      <section class="stats-strip" aria-label="Radar summary">
+        <div class="stat-block"><span class="stat-label">DATA DATE</span><strong id="stat-date">—</strong></div>
+        <div class="stat-block"><span class="stat-label">PROTOCOLS</span><strong id="stat-rows">—</strong></div>
+        <div class="stat-block"><span class="stat-label">WATCHLIST</span><strong id="stat-watch">—</strong></div>
+        <div class="stat-block"><span class="stat-label">MEDIAN IMPLIED</span><strong id="stat-median">—</strong></div>
+        <div class="stat-block"><span class="stat-label">LIVE COMPS</span><strong id="stat-live">—</strong></div>
+      </section>
+
+      <section class="radar-panel" aria-label="Protocol radar">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">THE RADAR</p>
+            <h2>Pre-token protocols</h2>
+          </div>
+          <div class="view-toggle" role="group" aria-label="Choose radar view">
+            <button id="view-board" class="toggle-button is-active" type="button" aria-pressed="true">Board</button>
+            <button id="view-live" class="toggle-button" type="button" aria-pressed="false">Live comps</button>
+          </div>
+        </div>
+
+        <div class="controls">
+          <label class="search-control" for="q">
+            <span class="control-label">SEARCH</span>
+            <span class="input-wrap"><span class="search-icon" aria-hidden="true"></span><input id="q" type="search" placeholder="Find a protocol…" autocomplete="off"></span>
+          </label>
+          <label class="select-control" for="f-cat">
+            <span class="control-label">CATEGORY</span>
+            <select id="f-cat"><option value="">All categories</option></select>
+          </label>
+          <label class="select-control" for="f-chain">
+            <span class="control-label">CHAIN</span>
+            <select id="f-chain"><option value="">All chains</option></select>
+          </label>
+          <label class="select-control sort-control" for="f-sort">
+            <span class="control-label">SORT BY</span>
+            <select id="f-sort">
+              <option value="value">Implied value</option>
+              <option value="tvl">TVL</option>
+              <option value="growth">7d change</option>
+              <option value="age">Age</option>
+            </select>
+          </label>
+        </div>
+        <p id="count-line" class="count-line" aria-live="polite" aria-atomic="true"></p>
+
+        <div class="table-scroll" id="board-table">
+          <table>
+            <caption class="sr-only">Pre-token protocol rankings</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="rank-cell">Rank <span class="sort-mark" aria-hidden="true">↕</span></th>
+                <th scope="col">Protocol <span class="sort-mark" aria-hidden="true">↕</span></th>
+                <th scope="col">Category <span class="sort-mark" aria-hidden="true">↕</span></th>
+                <th scope="col">Chains</th>
+                <th scope="col" class="numeric">TVL <span class="sort-mark" aria-hidden="true">↕</span></th>
+                <th scope="col" class="numeric">7d % <span class="sort-mark" aria-hidden="true">↕</span></th>
+                <th scope="col" class="numeric">Age <span class="sort-mark" aria-hidden="true">↕</span></th>
+                <th scope="col" class="numeric value-heading">Implied value <span class="sort-mark" aria-hidden="true">↕</span></th>
+                <th scope="col">Confidence</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <p id="empty" class="empty-state" hidden>No protocols match these filters. Try broadening your search.</p>
+
+        <section id="detail" class="detail-panel" aria-label="Protocol details" hidden>
+          <div class="detail-heading">
+            <div><p class="eyebrow">PROTOCOL BRIEF</p><h2 data-detail-name>Protocol details</h2></div>
+            <span class="confidence-pill confidence-a" data-detail-confidence>A</span>
+          </div>
+          <dl class="detail-grid">
+            <div><dt>Category</dt><dd data-detail-category>—</dd></div>
+            <div><dt>Chains</dt><dd data-detail-chains>—</dd></div>
+            <div><dt>Total value locked</dt><dd data-detail-tvl>—</dd></div>
+            <div><dt>7-day change</dt><dd data-detail-growth>—</dd></div>
+            <div><dt>Protocol age</dt><dd data-detail-age>—</dd></div>
+            <div><dt>Implied value</dt><dd data-detail-value>—</dd></div>
+          </dl>
+          <div class="farm-plan">
+            <div><p class="eyebrow">FIELD NOTES</p><h3>Suggested farm plan</h3></div>
+            <ol class="farm-steps" data-farm-steps></ol>
+          </div>
+        </section>
+
+        <div id="live-wrap" class="table-scroll live-table" hidden>
+          <table>
+            <caption class="sr-only">Already-tokenized protocol comparables</caption>
+            <thead>
+              <tr>
+                <th scope="col">Protocol</th>
+                <th scope="col">Category</th>
+                <th scope="col">Chains</th>
+                <th scope="col" class="numeric">TVL</th>
+                <th scope="col" class="numeric">Market cap</th>
+                <th scope="col" class="numeric">Mcap / TVL</th>
+              </tr>
+            </thead>
+            <tbody id="live-rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      <span class="footer-mark" aria-hidden="true">LS</span>
+      <p>Values are LaunchScope's own claim from the sealed 2026-11-14 DefiLlama snapshot, not a prediction that a token will launch.</p>
+      <span class="footer-model">PEER-ANCHOR-1</span>
+    </footer>
+  </div>
+</body>
+</html>
